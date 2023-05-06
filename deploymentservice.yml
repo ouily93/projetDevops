@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aop-app
+  labels:
+    app: aop-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aop-app
+  strategy:
+    type: RollingUpdate			
+    rollingUpdate:						
+      maxSurge: 1							
+      maxUnavailable: 0				
+  template:
+    metadata:
+      labels:
+        app: aop-app
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: aop-app
+          image: 11.1.1.40:5001/aop:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aop-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 32464
+  selector:
+    app: aop-app
